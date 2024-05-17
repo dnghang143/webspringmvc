@@ -151,4 +151,27 @@ public class ProductDAOImpl implements ProductDAO {
 		}
 		return false;
 	}
+	///////////////////////////////////////////////// 
+	@Override
+	public List<Product> searchByProductName(String productname) {
+	    Session session = sessionFactory.openSession(); // Mở một session mới thay vì sử dụng getCurrentSession()
+	    try {
+	        session.beginTransaction();
+	        // Sử dụng HQL để tìm kiếm các sản phẩm có productName chứa từ khóa
+	        Query query = session.createQuery("FROM Product WHERE productname LIKE :productname")
+	                            .setParameter("productname", "%" + productname + "%");
+	        List<Product> searchResults = query.list();
+	        session.getTransaction().commit();
+	        return searchResults;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        if (session.getTransaction() != null && session.getTransaction().isActive()) {
+	            session.getTransaction().rollback();
+	        }
+	        return new ArrayList<>(); // Trả về danh sách rỗng nếu có lỗi xảy ra
+	    } finally {
+	        session.close(); // Đảm bảo rằng session được đóng sau khi sử dụng
+	    }
+	}
+
 }

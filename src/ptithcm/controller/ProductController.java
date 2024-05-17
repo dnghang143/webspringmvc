@@ -89,31 +89,39 @@ public class ProductController {
 				String.format("category/index.htm?keyword=", product));
 		return "category/index";
 	}
-	@RequestMapping(value = "pro", method = RequestMethod.GET)
-	public String productindex(ModelMap model, HttpSession session, @RequestParam Map<String, String> params) {
-		String keyword = "";
+	// SỬA LẠI HÀM PRODUCTINDEX ĐỂ XỬ LÝ PAGINATION - PHÂN TRANG ( 5 SẢN PHẨM / 1 TRANG )
+	@RequestMapping(value = "pro/{page}", method = RequestMethod.GET)
+	public String productindex(ModelMap model, HttpSession session, @PathVariable int page) {
+		// Lấy danh sách sản phẩm từ DAO
+	    List<Product> allProducts = productDAO.listProducts();
+	    
+	    // Lọc sản phẩm theo từ khoá nếu cần
+	    String keyword = ""; // Thay đổi nếu bạn muốn lọc sản phẩm theo từ khoá
+	    List<Product> filteredProducts = productDAO.filterByKeyword(allProducts, keyword);
 
-		String title = "Danh sách sản phẩm";
-		if (params.containsKey("keyword")) {
-			keyword = params.get("keyword");
-			if (keyword != null && keyword.trim().length() > 0) {
-				title = "Tìm kiếm: " + keyword.trim();
-			}
-		}
-		List<Category> list = categoryDAO.listCategories();
-		model.addAttribute("category", list);
+	    // Tính số lượng trang
+	    int totalProducts = filteredProducts.size();
+	    int productsPerPage = 5;
+	    int totalPages = (int) Math.ceil((double) totalProducts / productsPerPage);
 
-		List<Product> productall = productDAO.listProducts();
-		
-		List<Product> product = productDAO.filterByKeyword(productall, keyword);
-		model.addAttribute("product", product);
-		model.addAttribute("keyword", keyword);
+	    // Đảm bảo trang hiện tại nằm trong phạm vi hợp lệ
+	    page = Math.min(Math.max(page, 1), totalPages);
 
-		model.addAttribute("title", title);
+	    // Tính chỉ số bắt đầu và kết thúc của sản phẩm trên trang hiện tại
+	    int startIndex = (page - 1) * productsPerPage;
+	    int endIndex = Math.min(startIndex + productsPerPage, totalProducts);
 
-		model.addAttribute("url",
-				String.format("category/index.htm?keyword=", product));
-		return "product/pro";
+	    // Lấy danh sách sản phẩm trên trang hiện tại
+	    List<Product> productsOnPage = filteredProducts.subList(startIndex, endIndex);
+
+	    // Truyền các thông tin vào model
+	    model.addAttribute("product", productsOnPage);
+	    model.addAttribute("keyword", keyword);
+	    model.addAttribute("title", "Danh sách sản phẩm");
+	    model.addAttribute("totalPages", totalPages);
+	    model.addAttribute("currentPage", page);
+
+	    return "product/pro";
 	}
 	@RequestMapping(value = "cart", params = { "id_product" })
 	public String addToCart(ModelMap model, HttpSession session, @RequestParam("id_product") int productId) {
@@ -128,4 +136,23 @@ public class ProductController {
 		}
 		return "redirect:/product/" + productId + ".htm";
 	}
+
+	// TÌM KIẾM SẢM PHẨM THEO productname
+	@RequestMapping(value = "search", method = RequestMethod.GET)
+    public String searchByProductName(ModelMap model, @RequestParam(value = "productname", required = false) String productname) {
+        String title = "Danh sách sản phẩm";
+        List<Product> searchResults = new ArrayList<>();
+
+        if (productname != null && !productname.trim().isEmpty()) {
+            title = "Tìm kiếm theo tên sản phẩm: " + productname.trim();
+            logger.info("Đã nhận tham số productName từ URL: {}", productname);
+            searchResults = productDAO.searchByProductName(productname.trim());
+        }
+
+        model.addAttribute("product", searchResults);
+        model.addAttribute("keyword", productname);
+        model.addAttribute("title", title);
+
+        return "product/index";
+    }
 }

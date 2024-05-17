@@ -162,7 +162,7 @@
 		   </select>
 		</div>
 	   </div>
-	   <div class="col-sm-6">
+	  <div class="col-sm-6">
 	    <div class="product_page_right_1_left text-right clearfix">
 		  <label class="label_1">Show</label> 
 		   <select class="form_2"> 
@@ -231,5 +231,4 @@
 
  <%@include file="/WEB-INF/views/include/footer.jsp"%> 
 </body>
-
 </html>

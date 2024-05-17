@@ -24,5 +24,7 @@ public interface ProductDAO {
 	 List<Product> listProductsGiamGia();
 
 	List<Product> filterByKeyword(List<Product> productall, String keyword);
+
+	List<Product> searchByProductName(String productname);
 	
 }

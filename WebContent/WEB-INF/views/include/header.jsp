@@ -204,7 +204,8 @@
 
 						<li><a class="menu_tab active_tag" href="home.htm">Home</a></li>
 
-						<li><a class="menu_tab" href="product/pro.htm">Product</a></li>
+						<!-- SỬA lại thẻ href để trỏ đến trang 1 của product -->
+						<li><a class="menu_tab" href="product/pro/1.htm">Product</a></li>
 
 
 						<li><a class="menu_tab" href="about.htm">About Us</a></li>
